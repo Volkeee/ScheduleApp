@@ -9,7 +9,7 @@ In order to try this application you will need either
 
 No worries about your personal data! The only information this app collects are your email address and public name, that\`s all!
 # Schedule web-site and Own Server
-This app uses [IFNTUOG\`s schedule][4]  website as a source of the schedule itself and uses own Ruby on Rails-based server to hold the informmation about tokens, devices, personal tasks etc.
+This app uses [IFNTUOG\`s schedule][4]  website as a source of the schedule itself and uses [own Ruby on Rails-based server][5] to hold the informmation about tokens, devices, personal tasks etc.
 # External libraries 
 This project uses several libraries according to Apache License. For example, the [SearchableSpinner][1] and [MaterialSpinner][2]. The Custom* classes has been created by copying and modifying the source code from corresponding Github projects. All the credits for the external libraries belongs to their authors, I have no rights for that code, only for modyfied parts.
 
@@ -33,4 +33,5 @@ limitations under the License.
 [1]: https://goo.gl/knZb5e
 [2]: https://goo.gl/gRtGef
 [3]: https://goo.gl/G9XTvw
-[4]: http://rozklad.nung.edu.ua
+[4]: https://rozklad.nung.edu.ua/
+[5]: https://github.com/Volkeee/schedule-api
