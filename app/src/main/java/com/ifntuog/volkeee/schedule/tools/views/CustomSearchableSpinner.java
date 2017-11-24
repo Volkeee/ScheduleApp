@@ -15,10 +15,11 @@ import android.widget.SpinnerAdapter;
 import com.ifntuog.volkeee.schedule.R;
 import com.ifntuog.volkeee.schedule.model.Group;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 public class CustomSearchableSpinner extends android.support.v7.widget.AppCompatSpinner implements View.OnTouchListener,
-        CustomSearchableListDialog.SearchableItem {
+        CustomSearchableListDialog.SearchableItem, Serializable {
 
     public static final int NO_ITEM_SELECTED = -1;
     private Context _context;

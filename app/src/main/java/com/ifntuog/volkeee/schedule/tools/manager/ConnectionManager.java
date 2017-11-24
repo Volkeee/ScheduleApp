@@ -32,7 +32,8 @@ public class ConnectionManager extends IntentService {
     public static final String ACTION_RETURN_GROUPS = "com.ifntuog.volkeee.schedule.RETURNGROUPS";
     private static final String SERVICE_NAME = "ConnectionManagerService";
 
-    private String rootUrl;
+    public static String rootUrl = "http://10.0.2.2/";
+    public static String rootSiteUrl = "http://rozklad.nung.edu.ua/";
 
     private Context mContext;
     private RequestQueue mRequestQueue;
@@ -45,7 +46,15 @@ public class ConnectionManager extends IntentService {
         super(SERVICE_NAME);
         mContext = context;
         mRequestQueue = Volley.newRequestQueue(mContext);
-        rootUrl = "http://10.0.2.2/";
+
+        try {
+            if(getDeviceName().getString("device_model").equals("Android SDK built for x86")) {
+                rootUrl = "http://10.0.2.2/";
+                requestGroupsFromSite();
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     public void requestGroups() {
@@ -61,40 +70,17 @@ public class ConnectionManager extends IntentService {
         mRequestQueue.add(request);
     }
 
-    public void createUser(Group group, User user) {
-        StringRequest request = new StringRequest(Request.Method.POST, rootUrl + "users", response -> {
-            //TODO: Manage the response and save the received token
+    public void requestGroupsFromSite() {
+        StringRequest request = new StringRequest(Request.Method.GET, rootSiteUrl.concat("application/api/groups.php?sort=asc"), response -> {
+            Intent serviceIntent = new Intent(mContext, this.getClass());
+            serviceIntent.setData(Uri.parse(response)).putExtra("type", "groups");
+
+            mContext.startService(serviceIntent);
         }, error -> {
-            Log.d("CreateUser", "Response is: " + error.toString());
+            Log.e("GROUPS", error.toString());
         }) {
-            @Override
-            public String getBodyContentType() {
-                return "application/json; charset=utf-8";
-            }
 
-            @Override
-            public byte[] getBody() {
-                Log.d("REQBODY", (("{" + group.toString() + "," + user.toString() + "}")));
-                try {
-                    String test = ("{\"group\":" + group.toJson().toString().trim() + ", " +
-                            "\"user\":" + user.toJson().toString().trim() + ", " +
-                            "\"device\":" + getDeviceName().toString().trim() + "}");
-                    Log.d("SSS", test);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-                try {
-                    return ("{\"group\":" + group.toJson().toString().trim() + ", " +
-                            "\"user\":" + user.toJson().toString().trim() + ", " +
-                            "\"device\":" + getDeviceName().toString().trim() + "}").getBytes();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            }
         };
-
         mRequestQueue.add(request);
     }
 

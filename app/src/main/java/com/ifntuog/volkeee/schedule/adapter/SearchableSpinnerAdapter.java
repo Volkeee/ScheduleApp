@@ -15,13 +15,14 @@ import android.widget.TextView;
 import com.ifntuog.volkeee.schedule.R;
 import com.ifntuog.volkeee.schedule.model.Group;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * Created by volkeee on 11/7/17.
  */
 
-public class SearchableSpinnerAdapter extends ArrayAdapter<Group> implements SpinnerAdapter, Filterable {
+public class SearchableSpinnerAdapter extends ArrayAdapter<Group> implements SpinnerAdapter, Filterable, Serializable {
     private Context mContext;
 
     private ArrayList<Group> originalData;

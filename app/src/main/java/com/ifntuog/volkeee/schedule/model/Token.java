@@ -1,5 +1,8 @@
 package com.ifntuog.volkeee.schedule.model;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.Serializable;
 import java.sql.Date;
 import java.sql.Time;
@@ -20,6 +23,37 @@ public class Token implements Serializable {
     private String deviceModel;
     private String androidVersion;
     private Boolean validity;
+
+    public Token() {
+    }
+
+    public Token(Integer id, String token, Integer userId, Date createdAtDate, Time createdAtTime, Date updatedAtDate, Time updatedAtTime, String deviceManufacturer, String deviceModel, String androidVersion, Boolean validity) {
+        this.id = id;
+        this.token = token;
+        this.userId = userId;
+        this.createdAtDate = createdAtDate;
+        this.createdAtTime = createdAtTime;
+        this.updatedAtDate = updatedAtDate;
+        this.updatedAtTime = updatedAtTime;
+        this.deviceManufacturer = deviceManufacturer;
+        this.deviceModel = deviceModel;
+        this.androidVersion = androidVersion;
+        this.validity = validity;
+    }
+
+    public Token(Token token) {
+        this.id = token.getId();
+        this.token = token.getToken();
+        this.userId = token.getUserId();
+        this.createdAtDate = token.getCreatedAtDate();
+        this.createdAtTime = token.getCreatedAtTime();
+        this.updatedAtDate = token.getUpdatedAtDate();
+        this.updatedAtTime = token.getUpdatedAtTime();
+        this.deviceManufacturer = token.getDeviceManufacturer();
+        this.deviceModel = token.getDeviceModel();
+        this.androidVersion = token.getAndroidVersion();
+        this.validity = token.getValidity();
+    }
 
     public Integer getId() {
         return id;
@@ -124,5 +158,15 @@ public class Token implements Serializable {
                 ", androidVersion='" + androidVersion + '\'' +
                 ", validity=" + validity +
                 '}';
+    }
+
+    public void parseJSON(JSONObject jsonObject) throws JSONException {
+        this.id = jsonObject.getInt("id");
+        this.token = jsonObject.getString("token");
+        this.userId = jsonObject.getInt("user_id");
+        this.deviceManufacturer = jsonObject.getString("device_manufacturer");
+        this.deviceModel = jsonObject.getString("device_model");
+        this.androidVersion = jsonObject.getString("os_version");
+        this.validity = jsonObject.getBoolean("validity");
     }
 }

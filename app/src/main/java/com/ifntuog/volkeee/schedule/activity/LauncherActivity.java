@@ -30,15 +30,18 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.ifntuog.volkeee.schedule.R;
 import com.ifntuog.volkeee.schedule.adapter.SearchableSpinnerAdapter;
 import com.ifntuog.volkeee.schedule.model.Group;
+import com.ifntuog.volkeee.schedule.model.Token;
 import com.ifntuog.volkeee.schedule.model.User;
 import com.ifntuog.volkeee.schedule.tools.manager.ConnectionManager;
 import com.ifntuog.volkeee.schedule.tools.FBUtil;
+import com.ifntuog.volkeee.schedule.tools.manager.TokenManager;
 import com.ifntuog.volkeee.schedule.tools.views.CustomMaterialSpinner;
 import com.ifntuog.volkeee.schedule.tools.views.CustomSearchableSpinner;
 
 
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -46,16 +49,18 @@ import java.util.Arrays;
 import java.util.Collections;
 
 
-public class LauncherActivity extends AppCompatActivity {
+public class LauncherActivity extends AppCompatActivity implements Serializable {
     public static int RC_SIGN_IN = 1,
             RC_FB_SIGN_IN = 2;
     private GroupsBroadcastReceiver mGroupsBroadcastReceiver;
+    private TokenManager mTokenManager;
     private CallbackManager mCallbackManager;
-    private CustomMaterialSpinner mSpinner;
+    private CustomSearchableSpinner mSpinner;
     private SearchableSpinnerAdapter mAdapter;
     private FBUtil prefUtil;
     private User mUser;
     private Group mGroup;
+    private Token mToken;
 
     private static Context mContext;
 
@@ -65,6 +70,23 @@ public class LauncherActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launcher);
+
+        mTokenManager = new TokenManager(this);
+        if(mTokenManager.checkLocalToken()) {
+            mUser = mTokenManager.readUser();
+            mGroup = mTokenManager.readGroup();
+            mToken = mTokenManager.readToken();
+
+            startActivityWithData(mGroup, mUser, mToken);
+        } else {
+
+        }
+    }
+
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+
         mContext = this;
         mSpinner = findViewById(R.id.groups_spinner);
 
@@ -107,7 +129,7 @@ public class LauncherActivity extends AppCompatActivity {
                                     mUser.setEmail(facebookData.getString("email"));
                                     mUser.setOrigin("fb");
 
-                                    startActivityWithData(mUser, (Group) mSpinner.getSelectedItem());
+                                    startActivityWithData((Group) mSpinner.getSelectedItem(), mUser);
                                 });
 
                         Bundle parameters = new Bundle();
@@ -138,11 +160,6 @@ public class LauncherActivity extends AppCompatActivity {
         });
 
         findViewById(R.id.mainCardView).setVisibility(View.INVISIBLE);
-    }
-
-    @Override
-    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
 
         IntentFilter groupsFilter = new IntentFilter(ConnectionManager.ACTION_RETURN_GROUPS);
         groupsFilter.addCategory(Intent.CATEGORY_DEFAULT);
@@ -151,7 +168,7 @@ public class LauncherActivity extends AppCompatActivity {
         registerReceiver(mGroupsBroadcastReceiver, groupsFilter);
 
         ConnectionManager connectionManager = new ConnectionManager(this);
-        connectionManager.requestGroups();
+        connectionManager.requestGroupsFromSite();
     }
 
     @Override
@@ -181,7 +198,7 @@ public class LauncherActivity extends AppCompatActivity {
             mUser.setEmail(acct.getEmail());
             mUser.setOrigin("ggl");
 
-            startActivityWithData(mUser, (Group) mSpinner.getSelectedItem());
+            startActivityWithData((Group) mSpinner.getSelectedItem(), mUser);
         } else {
             Log.e("GOOGLESIGN", "Error while trying to login with Google!" + result.toString());
         }
@@ -240,12 +257,19 @@ public class LauncherActivity extends AppCompatActivity {
         };
     }
 
-    private void startActivityWithData(User user, Group group) {
+    private void startActivityWithData(Group group, User user) {
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         intent.putExtra("user", user);
         intent.putExtra("group", group);
 
-        Log.d("SELECTED", group.toString());
+        startActivity(intent);
+    }
+
+    private void startActivityWithData(Group group, User user, Token token) {
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        intent.putExtra("user", user);
+        intent.putExtra("group", group);
+        intent.putExtra("token", token);
 
         startActivity(intent);
     }

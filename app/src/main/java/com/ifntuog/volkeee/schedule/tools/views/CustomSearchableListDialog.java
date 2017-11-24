@@ -28,7 +28,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 public class CustomSearchableListDialog extends DialogFragment implements
-        SearchView.OnQueryTextListener, SearchView.OnCloseListener {
+        SearchView.OnQueryTextListener, SearchView.OnCloseListener, Serializable {
 
     private static final String ITEMS = "items";
 

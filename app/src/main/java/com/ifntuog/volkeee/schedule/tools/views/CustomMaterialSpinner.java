@@ -151,6 +151,9 @@ public class CustomMaterialSpinner extends AppCompatSpinner implements ValueAnim
         //Erase the drawable selector not to be affected by new size (extra paddings)
         setBackgroundResource(R.drawable.my_background);
 
+        this.setOnClickListener(view -> {
+
+        });
     }
 
     private void initAttributes(Context context, AttributeSet attrs) {
@@ -513,6 +516,8 @@ public class CustomMaterialSpinner extends AppCompatSpinner implements ValueAnim
         }
         return super.onTouchEvent(event);
     }
+
+
 
     @Override
     public void setOnItemSelectedListener(final OnItemSelectedListener listener) {
