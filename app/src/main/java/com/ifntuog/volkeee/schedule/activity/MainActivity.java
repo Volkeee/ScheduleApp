@@ -1,9 +1,12 @@
 package com.ifntuog.volkeee.schedule.activity;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
+import android.support.transition.TransitionManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -24,11 +27,13 @@ import com.ifntuog.volkeee.schedule.model.User;
 import com.ifntuog.volkeee.schedule.tools.manager.ConnectionManager;
 import com.ifntuog.volkeee.schedule.tools.manager.TokenManager;
 
-public class MainActivity extends AppCompatActivity  {
+public class MainActivity extends AppCompatActivity {
     private User mUser;
     private Group mGroup;
     private TokenManager mTokenManager;
     private ConnectionManager mConnectionManager;
+    private ServiceBroadcastReceiver mServiceBroadcastReceiver;
+    private boolean progressBarVisibility = false;
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -51,15 +56,22 @@ public class MainActivity extends AppCompatActivity  {
         setContentView(R.layout.activity_main);
         mConnectionManager = new ConnectionManager(this);
         mTokenManager = new TokenManager(this);
+        mServiceBroadcastReceiver = new ServiceBroadcastReceiver();
 
-        if(getIntent()!=null) {
-            mUser = (User) getIntent().getSerializableExtra("user");
-            mGroup = (Group) getIntent().getSerializableExtra("group");
-            
-            Log.d("user", mUser.toString());
-            Log.d("group", mGroup.toString());
+        if (!mTokenManager.checkLocalToken()) {
+            if (getIntent() != null) {
+                mUser = (User) getIntent().getSerializableExtra("user");
+                mGroup = (Group) getIntent().getSerializableExtra("group");
 
-            mTokenManager.createUser(mUser, mGroup);
+                Log.d("user", mUser.toString());
+                Log.d("group", mGroup.toString());
+
+                mTokenManager.createUserRequest(mUser, mGroup);
+            }
+        } else {
+            mUser = mTokenManager.readUser();
+            mGroup = mTokenManager.readGroup();
+
         }
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -76,10 +88,6 @@ public class MainActivity extends AppCompatActivity  {
 
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
-
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show());
     }
 
     @Override
@@ -101,30 +109,56 @@ public class MainActivity extends AppCompatActivity  {
             return true;
         } else if (id == R.id.action_logout) {
             //TODO: Logout user and delete his token from the app
+            TransitionManager.beginDelayedTransition(findViewById(R.id.main_activity_root));
+            progressBarVisibility = !progressBarVisibility;
+            findViewById(R.id.progressBar3).setVisibility(progressBarVisibility ? View.VISIBLE : View.GONE);
+            mTokenManager.logoutUser();
+
+            IntentFilter userDeletedFilter = new IntentFilter(TokenManager.ACTION_USER_DELETED);
+            userDeletedFilter.addCategory(Intent.CATEGORY_DEFAULT);
+
+            registerReceiver(mServiceBroadcastReceiver, userDeletedFilter);
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private class ServiceBroadcastReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String intentType = intent.getAction();
+
+            if (intentType.equals(TokenManager.ACTION_USER_DELETED)){
+                handleLogoutBroadcast(context, intent);
+            }
         }
 
-        return super.onOptionsItemSelected(item);
+        private void handleLogoutBroadcast(Context context, Intent intent) {
+            finish();
+            Intent activityIntent = new Intent(context, LauncherActivity.class);
+            startActivity(activityIntent);
+        }
     }
 
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class PlaceholderFragment extends Fragment {
+    public static class ScheduleFragment extends Fragment {
         /**
          * The fragment argument representing the section number for this
          * fragment.
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
 
-        public PlaceholderFragment() {
+        public ScheduleFragment() {
         }
 
         /**
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
+        public static ScheduleFragment newInstance(int sectionNumber) {
+            ScheduleFragment fragment = new ScheduleFragment();
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             fragment.setArguments(args);
@@ -154,8 +188,8 @@ public class MainActivity extends AppCompatActivity  {
         @Override
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
-            // Return a PlaceholderFragment (defined as a static inner class below).
-            return PlaceholderFragment.newInstance(position + 1);
+            // Return a ScheduleFragment (defined as a static inner class below).
+            return ScheduleFragment.newInstance(position + 1);
         }
 
         @Override
