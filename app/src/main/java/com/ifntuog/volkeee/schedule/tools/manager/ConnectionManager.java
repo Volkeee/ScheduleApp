@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -13,16 +12,11 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.ifntuog.volkeee.schedule.model.Group;
-import com.ifntuog.volkeee.schedule.model.User;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by volkeee on 10/10/17.
@@ -32,7 +26,7 @@ public class ConnectionManager extends IntentService {
     public static final String ACTION_RETURN_GROUPS = "com.ifntuog.volkeee.schedule.RETURNGROUPS";
     private static final String SERVICE_NAME = "ConnectionManagerService";
 
-    public static String rootUrl = "http://10.0.2.2/";
+    public static String rootUrl = "http://31.134.70.105:3000/";
     public static String rootSiteUrl = "http://rozklad.nung.edu.ua/";
 
     private Context mContext;
@@ -50,7 +44,6 @@ public class ConnectionManager extends IntentService {
         try {
             if(getDeviceName().getString("device_model").equals("Android SDK built for x86")) {
                 rootUrl = "http://10.0.2.2/";
-                requestGroupsFromSite();
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -59,7 +52,7 @@ public class ConnectionManager extends IntentService {
 
     public void requestGroups() {
         StringRequest request = new StringRequest(Request.Method.GET, rootUrl + "groups", response -> {
-            Log.d("VolleyGroups", response);
+//            Log.d("VolleyGroups", response);
             Intent serviceIntent = new Intent(mContext, this.getClass());
             serviceIntent.setData(Uri.parse(response)).putExtra("type", "groups");
 
@@ -78,9 +71,7 @@ public class ConnectionManager extends IntentService {
             mContext.startService(serviceIntent);
         }, error -> {
             Log.e("GROUPS", error.toString());
-        }) {
-
-        };
+        });
         mRequestQueue.add(request);
     }
 
