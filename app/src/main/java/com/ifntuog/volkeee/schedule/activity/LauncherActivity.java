@@ -72,7 +72,7 @@ public class LauncherActivity extends AppCompatActivity implements Serializable 
         setContentView(R.layout.activity_launcher);
 
         mTokenManager = new TokenManager(this);
-        if(mTokenManager.checkLocalToken()) {
+        if (mTokenManager.checkLocalToken()) {
             mUser = mTokenManager.readUser();
             mGroup = mTokenManager.readGroup();
             mToken = mTokenManager.readToken();
@@ -160,15 +160,6 @@ public class LauncherActivity extends AppCompatActivity implements Serializable 
         });
 
         findViewById(R.id.mainCardView).setVisibility(View.INVISIBLE);
-
-        IntentFilter groupsFilter = new IntentFilter(ConnectionManager.ACTION_RETURN_GROUPS);
-        groupsFilter.addCategory(Intent.CATEGORY_DEFAULT);
-
-        mGroupsBroadcastReceiver = new GroupsBroadcastReceiver();
-        registerReceiver(mGroupsBroadcastReceiver, groupsFilter);
-
-        ConnectionManager connectionManager = new ConnectionManager(this);
-        connectionManager.requestGroupsFromSite();
     }
 
     @Override
@@ -257,11 +248,36 @@ public class LauncherActivity extends AppCompatActivity implements Serializable 
         };
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        findViewById(R.id.mainCardView).setVisibility(View.INVISIBLE);
+        findViewById(R.id.progressbarCardView).setVisibility(View.VISIBLE);
+
+        IntentFilter groupsFilter = new IntentFilter(ConnectionManager.ACTION_RETURN_GROUPS);
+        groupsFilter.addCategory(Intent.CATEGORY_DEFAULT);
+
+        mGroupsBroadcastReceiver = new GroupsBroadcastReceiver();
+        registerReceiver(mGroupsBroadcastReceiver, groupsFilter);
+
+        ConnectionManager connectionManager = new ConnectionManager(this);
+        connectionManager.requestGroupsFromSite();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mGroupsBroadcastReceiver != null)
+            unregisterReceiver(mGroupsBroadcastReceiver);
+    }
+
     private void startActivityWithData(Group group, User user) {
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         intent.putExtra("user", user);
         intent.putExtra("group", group);
 
+        finish();
         startActivity(intent);
     }
 
@@ -271,6 +287,7 @@ public class LauncherActivity extends AppCompatActivity implements Serializable 
         intent.putExtra("group", group);
         intent.putExtra("token", token);
 
+        finish();
         startActivity(intent);
     }
 
@@ -280,8 +297,17 @@ public class LauncherActivity extends AppCompatActivity implements Serializable 
 
     private class GroupsBroadcastReceiver extends BroadcastReceiver {
 
+
         @Override
         public void onReceive(Context context, Intent intent) {
+            String intentType = intent.getAction();
+            if (intentType.equals(ConnectionManager.ACTION_RETURN_GROUPS)) {
+                handleGroupBroadcast(context, intent);
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        private void handleGroupBroadcast(Context context, Intent intent) {
             findViewById(R.id.mainCardView).setVisibility(View.VISIBLE);
             findViewById(R.id.progressbarCardView).setVisibility(View.INVISIBLE);
             ArrayList<Group> groups = (ArrayList<Group>) intent.getSerializableExtra("groups");
@@ -289,17 +315,14 @@ public class LauncherActivity extends AppCompatActivity implements Serializable 
             Animation animation = AnimationUtils.loadAnimation(LauncherActivity.getContext(), R.anim.swing_up_left);
             findViewById(R.id.mainCardView).startAnimation(animation);
 
-            ArrayList<String> groupsStrings = new ArrayList<>();
-            for (Group group :
-                    groups) {
-                groupsStrings.add(group.getName());
-            }
-            Collections.sort(groupsStrings);
-
             mAdapter = new SearchableSpinnerAdapter(LauncherActivity.mContext, R.layout.item_spinner_textview, groups);
 
             mSpinner.setAdapter(mAdapter);
-//            mSpinner.setTitle("Select you group");
+//                mSpinner.setTitle("Select you group");
+        }
+
+        private void handleLogoutBroadcast(Context context, Intent intent) {
+
         }
     }
 
