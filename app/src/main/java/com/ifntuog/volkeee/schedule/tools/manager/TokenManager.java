@@ -5,10 +5,13 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
@@ -21,6 +24,9 @@ import com.ifntuog.volkeee.schedule.model.User;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by volkeee on 10/29/17.
  */
@@ -30,6 +36,7 @@ public class TokenManager extends IntentService {
     public static final String PREFS_NAME_TOKEN = "SCHEDULE_APP_TOKEN";
     public static final String PREFS_NAME_USER = "SCHEDULE_APP_USER";
     public static final String PREFS_NAME_GROUP = "SCHEDULE_APP_USER";
+    public static final String ACTION_USER_DELETED = "USER_DELETED";
     private SharedPreferences mSharedPrefs;
     private SharedPreferences.Editor mPreferencesEditor;
     private Context mContext;
@@ -53,9 +60,8 @@ public class TokenManager extends IntentService {
         mGson = new Gson();
     }
 
-    public void createUser(User user, Group group) {
+    public void createUserRequest(User user, Group group) {
         StringRequest request = new StringRequest(Request.Method.POST, rootUrl + "users", response -> {
-            //TODO: Manage the response and save the received token
             Token token = new Token();
             Log.d("RESPONSE", response);
 
@@ -79,15 +85,7 @@ public class TokenManager extends IntentService {
 
             @Override
             public byte[] getBody() {
-                Log.d("REQBODY", (("{" + group.toString() + "," + user.toString() + "}")));
-                try {
-                    String test = ("{\"group\":" + group.toJson().toString().trim() + ", " +
-                            "\"user\":" + user.toJson().toString().trim() + ", " +
-                            "\"device\":" + getDeviceName().toString().trim() + "}");
-                    Log.d("SSS", test);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+//                Log.d("REQBODY", (("{" + group.toString() + "," + user.toString() + "}")));
 
                 try {
                     return ("{\"group\":" + group.toJson().toString().trim() + ", " +
@@ -98,8 +96,42 @@ public class TokenManager extends IntentService {
                     return null;
                 }
             }
+
+        };
+        request.setRetryPolicy(new DefaultRetryPolicy(
+                0,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        mRequestQueue.add(request);
+    }
+
+    public void deleteUserRequest() {
+        StringRequest request = new StringRequest(Request.Method.DELETE, rootUrl + "user/deactivate-device", response -> {
+            Log.d("DeleteUser", response);
+            Intent serviceIntent = new Intent(mContext, this.getClass());
+            serviceIntent.setData(Uri.parse(response)).putExtra("type", "userDeleted");
+
+            mContext.startService(serviceIntent);
+        }, error -> {
+            Log.e("DeleteUser", error.toString());
+        }) {
+            @Override
+            public String getBodyContentType() {
+                return "application/json; charset=utf-8";
+            }
+
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> headers = new HashMap<>();
+                headers.put("Authorization", readToken().getToken());
+                return headers;
+            }
         };
 
+        request.setRetryPolicy(new DefaultRetryPolicy(
+                0,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         mRequestQueue.add(request);
     }
 
@@ -119,6 +151,12 @@ public class TokenManager extends IntentService {
                 .putString(PREFS_NAME_GROUP, mGson.toJson(group))
                 .putString(PREFS_NAME_TOKEN, mGson.toJson(token));
         mPreferencesEditor.commit();
+    }
+
+    public void removeToken() {
+
+        mPreferencesEditor.remove(PREFS_NAME_USER).remove(PREFS_NAME_GROUP).remove(PREFS_NAME_TOKEN);
+        mPreferencesEditor.apply();
     }
 
     @Nullable
@@ -142,9 +180,25 @@ public class TokenManager extends IntentService {
         return mGson.fromJson(json, Group.class);
     }
 
+    public void logoutUser() {
+        deleteUserRequest();
+    }
+
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
+        String type = intent.getStringExtra("type");
+        Intent response = new Intent();
+        String dataString = intent.getDataString();
+        TokenManager manager = new TokenManager(getApplicationContext());
 
+        if (type.equals("userDeleted")) {
+            response.setAction(ACTION_USER_DELETED);
+            response.addCategory(Intent.CATEGORY_DEFAULT);
+
+            manager.removeToken();
+
+            sendBroadcast(response);
+        }
     }
 
     public static JSONObject getDeviceName() throws JSONException {
