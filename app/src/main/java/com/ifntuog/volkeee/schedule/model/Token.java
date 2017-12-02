@@ -6,13 +6,13 @@ import org.json.JSONObject;
 import java.io.Serializable;
 import java.sql.Date;
 import java.sql.Time;
+import java.util.ArrayList;
 
 /**
  * Created by volkeee on 10/29/17.
  */
 
-public class Token implements Serializable {
-    private Integer id;
+public class Token extends BaseModel implements Serializable, BaseModelInterface {
     private String token;
     private Integer userId;
     private Date createdAtDate;
@@ -28,7 +28,7 @@ public class Token implements Serializable {
     }
 
     public Token(Integer id, String token, Integer userId, Date createdAtDate, Time createdAtTime, Date updatedAtDate, Time updatedAtTime, String deviceManufacturer, String deviceModel, String androidVersion, Boolean validity) {
-        this.id = id;
+        super(id, null);
         this.token = token;
         this.userId = userId;
         this.createdAtDate = createdAtDate;
@@ -53,14 +53,6 @@ public class Token implements Serializable {
         this.deviceModel = token.getDeviceModel();
         this.androidVersion = token.getAndroidVersion();
         this.validity = token.getValidity();
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public String getToken() {
@@ -143,6 +135,20 @@ public class Token implements Serializable {
         this.validity = validity;
     }
 
+    public static ArrayList parseJSON(String data) throws JSONException {
+        return null;
+    }
+
+    public void parseJSON(JSONObject jsonObject) throws JSONException {
+        this.id = jsonObject.getInt("id");
+        this.token = jsonObject.getString("token");
+        this.userId = jsonObject.getInt("user_id");
+        this.deviceManufacturer = jsonObject.getString("device_manufacturer");
+        this.deviceModel = jsonObject.getString("device_model");
+        this.androidVersion = jsonObject.getString("os_version");
+        this.validity = jsonObject.getBoolean("validity");
+    }
+
     @Override
     public String toString() {
         return "Token{" +
@@ -160,13 +166,15 @@ public class Token implements Serializable {
                 '}';
     }
 
-    public void parseJSON(JSONObject jsonObject) throws JSONException {
-        this.id = jsonObject.getInt("id");
-        this.token = jsonObject.getString("token");
-        this.userId = jsonObject.getInt("user_id");
-        this.deviceManufacturer = jsonObject.getString("device_manufacturer");
-        this.deviceModel = jsonObject.getString("device_model");
-        this.androidVersion = jsonObject.getString("os_version");
-        this.validity = jsonObject.getBoolean("validity");
+    @Override
+    public JSONObject toJson() throws JSONException {
+        return new JSONObject()
+                .put("id", id)
+                .put("token", token)
+                .put("user_id", userId)
+                .put("device_manufacturer", deviceManufacturer)
+                .put("device_model", deviceModel)
+                .put("os_version", androidVersion)
+                .put("validity", validity);
     }
 }

@@ -1,22 +1,19 @@
 package com.ifntuog.volkeee.schedule.model;
 
-import android.util.Log;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 /**
  * Created by volkeee on 10/6/17.
  */
 
-public class User implements Serializable {
+public class User extends BaseModel implements Serializable, BaseModelInterface {
     public static String JSON_KEY_ID = "id",
             JSON_KEY_NAME = "name",
             JSON_KEY_EMAIL = "email";
-    private Integer id;
-    private String name;
     private String email;
     private String origin;
     private Token token;
@@ -25,33 +22,8 @@ public class User implements Serializable {
     }
 
     public User(Integer id, String name, String email) {
-        this.id = id;
-        this.name = name;
+        super(id, name);
         this.email = email;
-    }
-
-    public User(JSONObject jsonObject) {
-        try {
-            this.fromJson(jsonObject);
-        } catch (JSONException e) {
-            Log.e("PARSE_ERROR", e.getMessage());
-        }
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getEmail() {
@@ -78,18 +50,13 @@ public class User implements Serializable {
         this.token = token;
     }
 
-    public static User parseJson(JSONObject jsonObject) throws JSONException {
-        User user = new User();
-        user.setId(jsonObject.getInt(JSON_KEY_ID));
-        user.setName(jsonObject.getString(JSON_KEY_NAME));
-        user.setEmail(jsonObject.getString(JSON_KEY_EMAIL));
-        return user;
+    public static ArrayList parseJSON(String data) {
+        return null;
     }
 
-    private void fromJson(JSONObject jsonObject) throws JSONException {
-        this.setId(jsonObject.getInt(JSON_KEY_ID));
-        this.setName(jsonObject.getString(JSON_KEY_NAME));
-        this.setEmail(jsonObject.getString(JSON_KEY_EMAIL));
+    @Override
+    public void parseJSON(JSONObject jsonObject) throws JSONException {
+
     }
 
     @Override

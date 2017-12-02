@@ -11,34 +11,15 @@ import java.util.ArrayList;
  * Created by volkeee on 10/10/17.
  */
 
-public class Group implements Serializable {
-    private Integer id;
-    private String name;
+public class Group extends BaseModel implements Serializable, BaseModelInterface {
     private Boolean hasSubgroups;
 
     public Group() {
     }
 
     public Group(Integer id, String name, Boolean has_subgroups) {
-        this.id = id;
-        this.name = name;
+        super(id, name);
         this.hasSubgroups = has_subgroups;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public Boolean getHasSubgroups() {
@@ -49,7 +30,7 @@ public class Group implements Serializable {
         this.hasSubgroups = hasSubgroups;
     }
 
-    public static ArrayList<Group> parseJSON(String data) throws JSONException {
+    public static ArrayList parseJSON(String data) throws JSONException {
         ArrayList<Group> groups = new ArrayList<>();
         JSONArray jsonArray = new JSONArray(data);
 
@@ -64,7 +45,7 @@ public class Group implements Serializable {
         return groups;
     }
 
-    private void parseJSON(JSONObject jsonObject) throws JSONException {
+    public void parseJSON(JSONObject jsonObject) throws JSONException {
         this.setId(jsonObject.getInt("id"));
         this.setName(jsonObject.getString("name"));
         this.setHasSubgroups(jsonObject.getBoolean("has_subgroups"));
@@ -73,13 +54,15 @@ public class Group implements Serializable {
     @Override
     public String toString() {
         return "Group{" +
-                "id=" + id +
+                "id=" + this.id +
                 ", name='" + name + '\'' +
                 ", hasSubgroups=" + hasSubgroups +
                 '}';
     }
 
     public JSONObject toJson() throws JSONException {
-        return new JSONObject().put("id", getId()).put("name", getName());
+        return new JSONObject()
+                .put("id", getId())
+                .put("name", getName());
     }
 }
