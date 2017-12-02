@@ -32,12 +32,10 @@ import com.ifntuog.volkeee.schedule.adapter.SearchableSpinnerAdapter;
 import com.ifntuog.volkeee.schedule.model.Group;
 import com.ifntuog.volkeee.schedule.model.Token;
 import com.ifntuog.volkeee.schedule.model.User;
-import com.ifntuog.volkeee.schedule.tools.manager.ConnectionManager;
 import com.ifntuog.volkeee.schedule.tools.FBUtil;
+import com.ifntuog.volkeee.schedule.tools.manager.ConnectionManager;
 import com.ifntuog.volkeee.schedule.tools.manager.TokenManager;
-import com.ifntuog.volkeee.schedule.tools.views.CustomMaterialSpinner;
 import com.ifntuog.volkeee.schedule.tools.views.CustomSearchableSpinner;
-
 
 import org.json.JSONObject;
 
@@ -46,7 +44,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 
 
 public class LauncherActivity extends AppCompatActivity implements Serializable {
