@@ -26,6 +26,7 @@ public class Lesson extends BaseModel implements Serializable, BaseModelInterfac
     private String type;
     private String teacher;
     private String auditory;
+    private Integer day;
 
     public Lesson() {
     }
@@ -88,16 +89,30 @@ public class Lesson extends BaseModel implements Serializable, BaseModelInterfac
         this.auditory = auditory;
     }
 
+    public Integer getDay() {
+        return day;
+    }
+
+    public void setDay(Integer day) {
+        this.day = day;
+    }
+
     public static ArrayList parseJSON(String data) throws JSONException {
         ArrayList<Lesson> lessons = new ArrayList<>();
         JSONArray jsonArray = new JSONArray(data);
 
         for (Integer i = 0; i < jsonArray.length(); i++) {
-            JSONObject groupJson = jsonArray.getJSONObject(i);
-            Lesson lesson = new Lesson();
-            lesson.parseJSON(groupJson);
+            JSONObject lessonsJSON = jsonArray.getJSONObject(i);
 
-            lessons.add(lesson);
+            JSONArray lessonsArray = lessonsJSON.getJSONArray("lessons");
+            for (int iterator = 0; iterator < lessonsArray.length(); iterator++) {
+                Lesson lesson = new Lesson();
+                lesson.parseJSON(lessonsArray.getJSONObject(iterator));
+
+
+                lesson.day = lessonsJSON.getInt("day");
+                lessons.add(lesson);
+            }
         }
 
         return lessons;
@@ -114,6 +129,7 @@ public class Lesson extends BaseModel implements Serializable, BaseModelInterfac
                 ", type='" + type + '\'' +
                 ", teacher='" + teacher + '\'' +
                 ", auditory='" + auditory + '\'' +
+                ", day=" + day +
                 '}';
     }
 
