@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.transition.TransitionManager;
 import android.support.v4.app.Fragment;
@@ -12,27 +13,29 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.ifntuog.volkeee.schedule.R;
+import com.ifntuog.volkeee.schedule.fragment.ScheduleFragment;
 import com.ifntuog.volkeee.schedule.model.Group;
+import com.ifntuog.volkeee.schedule.model.Token;
 import com.ifntuog.volkeee.schedule.model.User;
 import com.ifntuog.volkeee.schedule.tools.manager.ConnectionManager;
 import com.ifntuog.volkeee.schedule.tools.manager.TokenManager;
 
 public class MainActivity extends AppCompatActivity {
     private User mUser;
-    private Group mGroup;
+    public static Group mGroup;
+    private Token mToken;
     private TokenManager mTokenManager;
     private ConnectionManager mConnectionManager;
     private ServiceBroadcastReceiver mServiceBroadcastReceiver;
+    private RecyclerView mRecyclerView;
     private boolean progressBarVisibility = false;
 
     /**
@@ -58,21 +61,6 @@ public class MainActivity extends AppCompatActivity {
         mTokenManager = new TokenManager(this);
         mServiceBroadcastReceiver = new ServiceBroadcastReceiver();
 
-        if (!mTokenManager.checkLocalToken()) {
-            if (getIntent() != null) {
-                mUser = (User) getIntent().getSerializableExtra("user");
-                mGroup = (Group) getIntent().getSerializableExtra("group");
-
-                Log.d("user", mUser.toString());
-                Log.d("group", mGroup.toString());
-
-                mTokenManager.createUserRequest(mUser, mGroup);
-            }
-        } else {
-            mUser = mTokenManager.readUser();
-            mGroup = mTokenManager.readGroup();
-
-        }
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -88,6 +76,28 @@ public class MainActivity extends AppCompatActivity {
 
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
+    }
+
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+
+        if (!mTokenManager.checkLocalToken()) {
+            if (getIntent() != null) {
+                mUser = (User) getIntent().getSerializableExtra("user");
+                mGroup = (Group) getIntent().getSerializableExtra("group");
+
+                Log.d("user", mUser.toString());
+                Log.d("group", mGroup.toString());
+
+                mTokenManager.createUserRequest(mUser, mGroup);
+            }
+        } else {
+            mUser = mTokenManager.readUser();
+            mGroup = mTokenManager.readGroup();
+            mToken = mTokenManager.readToken();
+        }
+//        toggleProgressBar();
     }
 
     @Override
@@ -108,10 +118,7 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.action_settings) {
             return true;
         } else if (id == R.id.action_logout) {
-            //TODO: Logout user and delete his token from the app
-            TransitionManager.beginDelayedTransition(findViewById(R.id.main_activity_root));
-            progressBarVisibility = !progressBarVisibility;
-            findViewById(R.id.progressBar3).setVisibility(progressBarVisibility ? View.VISIBLE : View.GONE);
+            toggleProgressBar();
             mTokenManager.logoutUser();
 
             IntentFilter userDeletedFilter = new IntentFilter(TokenManager.ACTION_USER_DELETED);
@@ -122,56 +129,29 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void toggleProgressBar() {
+        TransitionManager.beginDelayedTransition(findViewById(R.id.main_activity_root));
+        progressBarVisibility = !progressBarVisibility;
+        findViewById(R.id.progressBar3).setVisibility(progressBarVisibility ? View.VISIBLE : View.GONE);
+    }
+
     private class ServiceBroadcastReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
             String intentType = intent.getAction();
 
-            if (intentType.equals(TokenManager.ACTION_USER_DELETED)){
+            if (intentType.equals(TokenManager.ACTION_USER_DELETED)) {
                 handleLogoutBroadcast(context, intent);
+            } else {
             }
         }
+
 
         private void handleLogoutBroadcast(Context context, Intent intent) {
             finish();
             Intent activityIntent = new Intent(context, LauncherActivity.class);
             startActivity(activityIntent);
-        }
-    }
-
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class ScheduleFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private static final String ARG_SECTION_NUMBER = "section_number";
-
-        public ScheduleFragment() {
-        }
-
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static ScheduleFragment newInstance(int sectionNumber) {
-            ScheduleFragment fragment = new ScheduleFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_start, container, false);
-            TextView textView = rootView.findViewById(R.id.section_label);
-            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
-            return rootView;
         }
     }
 
