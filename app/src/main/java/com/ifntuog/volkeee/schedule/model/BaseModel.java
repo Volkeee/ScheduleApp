@@ -1,10 +1,12 @@
 package com.ifntuog.volkeee.schedule.model;
 
+import java.io.Serializable;
+
 /**
  * Created by volkeee on 12/1/17.
  */
 
-public class BaseModel {
+public class BaseModel implements Serializable {
     public Integer id;
     public String name;
 
