@@ -1,5 +1,9 @@
 package com.ifntuog.volkeee.schedule.model;
 
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,7 +15,8 @@ import java.util.ArrayList;
  * Created by volkeee on 12/1/17.
  */
 
-public class Lesson extends BaseModel implements Serializable, BaseModelInterface {
+@Entity
+public class Lesson implements Serializable, BaseModelInterface {
     public static final String KEY_PERIOD = "period";
     public static final String KEY_WEEK = "week";
     public static final String KEY_SUBGROUP = "subgroup";
@@ -20,25 +25,49 @@ public class Lesson extends BaseModel implements Serializable, BaseModelInterfac
     public static final String KEY_TEACHER = "teacher";
     public static final String KEY_AUDITORY = "room";
 
+    @PrimaryKey
+    private String name;
+
+    @ColumnInfo(name = "period")
     private Integer period;
+
+    @ColumnInfo(name = "week")
     private Integer week;
+
+    @ColumnInfo(name = "subgroup")
     private Integer subgroup;
+
+    @ColumnInfo(name ="type")
     private String type;
+
+    @ColumnInfo(name = "teacher")
     private String teacher;
+
+    @ColumnInfo(name = "auditory")
     private String auditory;
+
+    @ColumnInfo(name = "day")
     private Integer day;
 
     public Lesson() {
     }
 
     public Lesson(String name, Integer period, Integer week, Integer subgroup, String type, String teacher, String auditory) {
-        super(null, name);
+        this.name = name;
         this.period = period;
         this.week = week;
         this.subgroup = subgroup;
         this.type = type;
         this.teacher = teacher;
         this.auditory = auditory;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Integer getPeriod() {
@@ -121,8 +150,7 @@ public class Lesson extends BaseModel implements Serializable, BaseModelInterfac
     @Override
     public String toString() {
         return "Lesson{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
+                "name='" + name + '\'' +
                 ", period=" + period +
                 ", week=" + week +
                 ", subgroup=" + subgroup +
