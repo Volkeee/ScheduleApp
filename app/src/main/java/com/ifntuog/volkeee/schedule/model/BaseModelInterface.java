@@ -3,8 +3,6 @@ package com.ifntuog.volkeee.schedule.model;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-
 /**
  * Created by volkeee on 12/1/17.
  */
