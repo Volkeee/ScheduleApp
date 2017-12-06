@@ -24,7 +24,7 @@
         <activity
             android:name=".activity.MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".activity.LauncherActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
@@ -55,7 +55,15 @@
                 <data android:scheme="@string/fb_login_protocol_scheme" />
             </intent-filter>
         </activity>
-
+        <activity
+            android:name=".activity.TaskActivity"
+            android:label="@string/title_activity_task"
+            android:parentActivityName=".activity.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.ifntuog.volkeee.schedule.activity.MainActivity" />
+        </activity>
     </application>
 
 </manifest>
