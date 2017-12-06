@@ -55,7 +55,6 @@
         android:id="@+id/left_constraint_layout"
         android:layout_width="60dp"
         android:layout_height="0dp"
-        android:background="@color/colorPrimary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
