@@ -99,7 +99,6 @@ public class ScheduleListAdapter extends RecyclerView.Adapter<ScheduleListAdapte
             String day = days.get(viewsDay);
             holder.textViewDay.setText(day);
             holder.setDay(viewsDay);
-//            mLessonLists.add(holder);
 
             ArrayList<Lesson> sortedLessons = new ArrayList<>();
             for (Lesson lesson :
@@ -110,7 +109,6 @@ public class ScheduleListAdapter extends RecyclerView.Adapter<ScheduleListAdapte
             }
             holder.setDataForList(sortedLessons);
         } else {
-//            removeItem(holder.getAdapterPosition());
             holder.setVisibility(false);
         }
     }
@@ -121,45 +119,19 @@ public class ScheduleListAdapter extends RecyclerView.Adapter<ScheduleListAdapte
         return 5;
     }
 
-    public void setDataForInnerList(ArrayList<Lesson> lessons) {
-        for (int i = 1; i <= 5; i++) {
-            ArrayList<Lesson> sortedLessons = new ArrayList<>();
-            for (Lesson lesson :
-                    lessons) {
-                if (lesson.getDay() == i) {
-                    sortedLessons.add(lesson);
-                }
-            }
-            mLessonLists.get(i).setDataForList(sortedLessons);
-        }
-    }
-
-    private void removeItem(int position) {
-        days.remove(position+1);
-        notifyItemRemoved(position);
-    }
-
     public class ViewHolder extends RecyclerView.ViewHolder {
         private LessonsRecyclerAdapter mAdapter;
         private ArrayList<Lesson> mLessons;
         private Context mContext;
-        private CardView rootView;
         public Integer day;
-        public TextView textViewDate;
         public TextView textViewDay;
         public RecyclerView lessonsRecyclerView;
 
         public ViewHolder(View itemView) {
             super(itemView);
-//            textViewDate = itemView.findViewById(R.id.date_text_view);
             textViewDay = itemView.findViewById(R.id.date_text_view);
             lessonsRecyclerView = itemView.findViewById(R.id.lessons_recycler_view);
-            rootView = itemView.findViewById(R.id.schedule_card_view_container);
             mContext = itemView.getContext();
-        }
-
-        public void hideHolder() {
-            rootView.setVisibility(View.GONE);
         }
 
         public Integer getDay() {
@@ -172,7 +144,6 @@ public class ScheduleListAdapter extends RecyclerView.Adapter<ScheduleListAdapte
 
         public void setDataForList(ArrayList<Lesson> lessons) {
             mLessons = new ArrayList<>();
-//            mLessons.addAll(lessons);
             mAdapter = new LessonsRecyclerAdapter(mLessons);
 
             lessonsRecyclerView.setAdapter(mAdapter);
