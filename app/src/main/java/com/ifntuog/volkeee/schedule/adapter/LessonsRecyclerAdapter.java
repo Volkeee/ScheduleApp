@@ -18,10 +18,12 @@ import java.util.ArrayList;
 
 public class LessonsRecyclerAdapter extends RecyclerView.Adapter<LessonsRecyclerAdapter.ViewHolder> {
     private ArrayList<Lesson> lessons;
+    private OnItemClickListener mOnItemClickListener;
 
-    public LessonsRecyclerAdapter(ArrayList<Lesson> lessons) {
+    public LessonsRecyclerAdapter(ArrayList<Lesson> lessons, OnItemClickListener onItemClickListener) {
         this.lessons = new ArrayList<>();
         swap(lessons);
+        mOnItemClickListener = onItemClickListener;
     }
 
     @Override
@@ -40,6 +42,8 @@ public class LessonsRecyclerAdapter extends RecyclerView.Adapter<LessonsRecycler
         holder.lessonOrder.setText(lesson.getPeriod().toString());
         holder.lessonTeacher.setText(lesson.getTeacher());
         holder.lessonType.setText(lesson.getType());
+
+        holder.setOnItemClickListener(lessons.get(position), mOnItemClickListener);
     }
 
     @Override
@@ -59,6 +63,7 @@ public class LessonsRecyclerAdapter extends RecyclerView.Adapter<LessonsRecycler
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
+        ConstraintLayout rootConstraint;
         TextView lessonName;
         TextView lessonTeacher;
         TextView lessonAuditory;
@@ -72,6 +77,14 @@ public class LessonsRecyclerAdapter extends RecyclerView.Adapter<LessonsRecycler
             this.lessonAuditory = itemView.findViewById(R.id.textView_auditory);
             this.lessonOrder = itemView.findViewById(R.id.textView_order);
             this.lessonType = itemView.findViewById(R.id.textView_type);
+
+            this.rootConstraint = (ConstraintLayout) itemView.getRootView();
+        }
+
+        public void setOnItemClickListener(Lesson lesson, OnItemClickListener onItemClickListener) {
+            rootConstraint.setOnClickListener(view -> {
+                mOnItemClickListener.onItemClick(lesson);
+            });
         }
     }
 }
