@@ -30,8 +30,9 @@ public class ScheduleListAdapter extends RecyclerView.Adapter<ScheduleListAdapte
     private TreeMap<Integer, String> days;
     private Integer mWeek;
     private Context mContext;
+    private OnItemClickListener mOnItemClickListener;
 
-    public ScheduleListAdapter(ArrayList<Lesson> lessonsList, Context context, Integer week) {
+    public ScheduleListAdapter(ArrayList<Lesson> lessonsList, Context context, Integer week, OnItemClickListener onItemClickListener) {
         days = new TreeMap<>();
         data = new ArrayList<>();
         data.clear();
@@ -62,6 +63,8 @@ public class ScheduleListAdapter extends RecyclerView.Adapter<ScheduleListAdapte
         days.putAll(copy);
 
         mLessonLists = new ArrayList<>();
+
+        mOnItemClickListener = onItemClickListener;
     }
 
     @Override
@@ -144,19 +147,20 @@ public class ScheduleListAdapter extends RecyclerView.Adapter<ScheduleListAdapte
 
         public void setDataForList(ArrayList<Lesson> lessons) {
             mLessons = new ArrayList<>();
-            mAdapter = new LessonsRecyclerAdapter(mLessons);
+            mAdapter = new LessonsRecyclerAdapter(mLessons, mOnItemClickListener);
 
             lessonsRecyclerView.setAdapter(mAdapter);
             lessonsRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
             mAdapter.swap(lessons);
         }
-        public void setVisibility(boolean isVisible){
-            RecyclerView.LayoutParams param = (RecyclerView.LayoutParams)itemView.getLayoutParams();
-            if (isVisible){
+
+        public void setVisibility(boolean isVisible) {
+            RecyclerView.LayoutParams param = (RecyclerView.LayoutParams) itemView.getLayoutParams();
+            if (isVisible) {
                 param.height = LinearLayout.LayoutParams.WRAP_CONTENT;
                 param.width = LinearLayout.LayoutParams.MATCH_PARENT;
                 itemView.setVisibility(View.VISIBLE);
-            }else{
+            } else {
                 itemView.setVisibility(View.GONE);
                 param.height = 0;
                 param.width = 0;
