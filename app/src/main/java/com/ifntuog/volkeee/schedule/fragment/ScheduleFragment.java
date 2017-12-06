@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 
 import com.ifntuog.volkeee.schedule.R;
 import com.ifntuog.volkeee.schedule.activity.MainActivity;
+import com.ifntuog.volkeee.schedule.activity.TaskActivity;
 import com.ifntuog.volkeee.schedule.adapter.ScheduleListAdapter;
 import com.ifntuog.volkeee.schedule.model.Lesson;
 import com.ifntuog.volkeee.schedule.tools.manager.ConnectionManager;
@@ -99,13 +100,16 @@ public class ScheduleFragment extends android.support.v4.app.Fragment {
 
         private void handleLessonsBroadcast(Context context, Intent intent) {
             if (intent.getAction().equals(ConnectionManager.ACTION_RETURN_LESSONS + mFragmentsWeek)) {
-                mAdapter = new ScheduleListAdapter((ArrayList<Lesson>) intent.getSerializableExtra("lessons"), getContext(), mFragmentsWeek);
+                mAdapter = new ScheduleListAdapter((ArrayList<Lesson>) intent.getSerializableExtra("lessons"),
+                        getContext(),
+                        mFragmentsWeek, lesson -> {
+                    Intent tasksActivityIntent = new Intent(getActivity(), TaskActivity.class);
+                    tasksActivityIntent.putExtra("lesson", lesson);
+                    startActivity(tasksActivityIntent);
+                });
                 mRecyclerView.setAdapter(mAdapter);
                 listInitialized = !listInitialized;
-
             }
-
-//            mAdapter.setDataForInnerList();
         }
     }
 }
